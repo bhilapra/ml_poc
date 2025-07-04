@@ -11,9 +11,9 @@ spec:
     - name: git-revision
       value: main
     - name: training-image
-      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml"/train:latest
+      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml/train:latest
     - name: app-image
-      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml"/flask:latest
+      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml/flask:latest
   workspaces:
     - name: shared-workspace
       volumeClaimTemplate:

@@ -87,6 +87,7 @@ for name, model in models.items():
 print(f"Best Model: {best_model_name} with MAE: {best_mae:.4f}")
 
 # Save best model + scaler
-joblib.dump(best_model, "train/models/best_model.pkl")
-joblib.dump(scaler, "train/models/scaler.pkl")
+os.makedirs("models", exist_ok=True) 
+joblib.dump(best_model, "models/best_model.pkl")
+joblib.dump(scaler, "models/scaler.pkl")
 print("Saved best model and scaler to train/models/")
