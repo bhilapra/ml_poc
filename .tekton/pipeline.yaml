@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ml-train-deploy-pipeline
+spec:
+  params:
+    - name: git-url
+      type: string
+    - name: git-revision
+      type: string
+      default: "main"
+    - name: training-image
+      type: string
+    - name: app-image
+      type: string
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: clone-repo
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+
+    - name: build-train-image
+      runAfter: [clone-repo]
+      taskRef:
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: $(params.training-image)
+        - name: CONTEXT
+          value: $(workspaces.shared-workspace.path)/train
+
+    - name: train-model
+      runAfter: [build-train-image]
+      taskSpec:
+        workspaces:
+          - name: shared
+        steps:
+          - name: run-training
+            image: $(params.training-image)
+            workingDir: /workspace/shared
+            script: |
+              python train/train.py
+      workspaces:
+        - name: shared
+          workspace: shared-workspace
+
+    - name: copy-models
+      runAfter: [train-model]
+      taskSpec:
+        workspaces:
+          - name: shared
+        steps:
+          - name: copy-artifacts
+            image: registry.access.redhat.com/ubi8/ubi
+            script: |
+              #!/bin/bash
+              echo "Copying trained model from train/ to app/"
+              mkdir -p /workspace/shared/app/models/
+              cp -v /workspace/shared/train/models/* /workspace/shared/app/models/
+      workspaces:
+        - name: shared
+          workspace: shared-workspace
+
+
+    - name: build-app-image
+      runAfter: [train-model]
+      taskRef:
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: $(params.app-image)
+        - name: CONTEXT
+          value: $(workspaces.shared-workspace.path)/app
+
+    - name: deploy
+      runAfter: [build-app-image]
+      taskSpec:
+        steps:
+          - name: deploy-flask
+            image: registry.redhat.io/openshift4/ose-cli
+            script: |
+              oc set image deployment/flask-app flask-app=$(params.app-image) --namespace=$(context.pipelineRun.namespace)

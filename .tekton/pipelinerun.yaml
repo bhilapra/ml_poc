@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: ml-train-deploy-run-
+spec:
+  pipelineRef:
+    name: ml-train-deploy-pipeline
+  params:
+    - name: git-url
+      value: https://github.com/bhilapra/ml_poc.git
+    - name: git-revision
+      value: main
+    - name: training-image
+      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml"/train:latest
+    - name: app-image
+      value: image-registry.openshift-image-registry.svc:5000/sovereign-ml"/flask:latest
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        metadata:
+          name: ml-workspace-pvc
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

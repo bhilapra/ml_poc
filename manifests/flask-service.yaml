@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+spec:
+  selector:
+    app: flask-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: flask-route
+spec:
+  to:
+    kind: Service
+    name: flask-service
+  port:
+    targetPort: 5000

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🛵 Predict Delivery Time</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 40px;
+      background: #EACABB;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .logo {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 120px;  /* bigger size */
+      height: auto;
+      z-index: 1000;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px 40px;
+      border-radius: 12px;
+      width: 360px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    label, select, input {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+    button {
+      background: #009688;
+      color: white;
+      padding: 12px;
+      border: none;
+      width: 100%;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #00796b;
+    }
+    .result {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 20px;
+      color: #333;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo outside the form container -->
+  <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo" />
+
+  <div class="container">
+    <form method="post">
+      <h1>🛵 Predict Delivery Time</h1>
+
+      <label>Delivery Person's Age</label>
+      <input name="age" type="number" step="0.1" required />
+
+      <label>Ratings</label>
+      <input name="rating" type="number" step="0.1" required />
+
+      <label>Distance (in km)</label>
+      <input name="distance" type="number" step="0.01" required />
+
+      <label>Type of Order</label>
+      <select name="order_type" required>
+        <option value="Drinks">Drinks</option>
+        <option value="Meal">Meal</option>
+        <option value="Snack">Snack</option>
+      </select>
+
+      <label>Type of Vehicle</label>
+      <select name="vehicle_type" required>
+        <option value="electric_scooter">Electric Scooter</option>
+        <option value="motorcycle">Motorcycle</option>
+        <option value="scooter">Scooter</option>
+      </select>
+
+      <button type="submit">🚀 Predict Time</button>
+
+      {% if prediction is not none %}
+      <div class="result">
+        ⏱️ Estimated Delivery Time: <strong>{{ prediction }} minutes</strong>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</body>
+</html>
